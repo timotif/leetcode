@@ -129,8 +129,47 @@ int positive_delta(int *arr, int size, int *sub1, int *sub2, int delta)
                     mask[m_idx++] = find_unique_r(arr, size, arr[i] - delta, mask);
             }
             else
+            {
+                free(mask);
                 return (0);
+            }
         }
+        free(mask);
+    }
+    // print_array(sub1, size / 2);
+    // print_array(sub2, size / 2);
+    return (1);
+}
+
+int negative_delta(int *arr, int size, int *sub1, int *sub2, int delta)
+{
+    int *mask = malloc(sizeof(int) * size);
+    int m_idx = 0;
+    int s1_idx = size / 2 - 1;
+    int s2_idx = size / 2 - 1;
+
+    init_array(mask, size, -1);
+    init_array(sub1, size / 2, -1);
+    init_array(sub2, size / 2, -1);
+    for (int i = 0; i < size; i++)
+    {
+        if (find_index(mask, size, i) < 0)
+        {
+            int split_idx = find_unique(arr, size, arr[i] - delta, mask);
+            if (split_idx >= 0)
+            {
+                    sub2[s2_idx--] = arr[i];
+                    mask[m_idx++] = i;
+                    sub1[s1_idx--] = arr[i] - delta;
+                    mask[m_idx++] = find_unique(arr, size, arr[i] - delta, mask);
+            }
+            else
+            {
+                free(mask);
+                return (0);
+            }
+        }
+        free(mask);
     }
     // print_array(sub1, size / 2);
     // print_array(sub2, size / 2);
