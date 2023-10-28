@@ -134,7 +134,7 @@ int positive_delta(int *arr, int size, int *sub1, int *sub2, int delta)
                 return (0);
             }
         }
-        free(mask);
+        // free(mask);
     }
     // print_array(sub1, size / 2);
     // print_array(sub2, size / 2);
