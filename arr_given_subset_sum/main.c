@@ -43,6 +43,8 @@ sums.length == 2^n
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#define SEP -1000
 
 void print_array(int *arr, int size)
 {
@@ -106,120 +108,124 @@ void init_array(int *arr, int size, int value)
         arr[i] = value;
 }
 
-int positive_delta(int *arr, int size, int *sub1, int *sub2, int delta)
+int intlen(int *arr)
 {
-    int *mask = malloc(sizeof(int) * size);
-    int m_idx = 0;
-    int s1_idx = size / 2 - 1;
-    int s2_idx = size / 2 - 1;
-
-    init_array(mask, size, -1);
-    init_array(sub1, size / 2, -1);
-    init_array(sub2, size / 2, -1);
-    for (int i = size - 1; i >= 0; i--)
-    {
-        if (find_index(mask, size, i) < 0)
-        {
-            int split_idx = find_unique_r(arr, size, arr[i] - delta, mask);
-            if (split_idx >= 0)
-            {
-                    sub2[s1_idx--] = arr[i];
-                    mask[m_idx++] = i;
-                    sub1[s2_idx--] = arr[i] - delta;
-                    mask[m_idx++] = find_unique_r(arr, size, arr[i] - delta, mask);
-            }
-            else
-            {
-                free(mask);
-                return (0);
-            }
-        }
-    }
-    free(mask);
-    // print_array(sub1, size / 2);
-    // print_array(sub2, size / 2);
-    return (1);
+    if (!arr)
+        return (0);
+    int i = 0;
+    while (arr[i] != SEP)
+        i++;
+    return (i);
 }
 
-int negative_delta(int *arr, int size, int *sub1, int *sub2, int delta)
-{
-    int *mask = malloc(sizeof(int) * size);
-    int m_idx = 0;
-    int s1_idx = size / 2 - 1;
-    int s2_idx = size / 2 - 1;
+int *dfs(int *sums, int n) {
+    if (find_index(sums, n, 0) < 0)
+        return (NULL);
+    if (n == 2)
+        return (sums[0] == 0 ? (int[]){sums[1]} : (int[]){sums[0]});
+    int x = sums[n - 1] - sums[n - 2];
 
-    init_array(mask, size, -1);
-    init_array(sub1, size / 2, -1);
-    init_array(sub2, size / 2, -1);
-    for (int i = 0; i < size; i++)
-    {
-        if (find_index(mask, size, i) < 0)
-        {
-            int split_idx = find_unique(arr, size, arr[i] - delta, mask);
-            if (split_idx >= 0)
-            {
-                    sub2[s1_idx--] = arr[i];
-                    mask[m_idx++] = i;
-                    sub1[s2_idx--] = arr[i] - delta;
-                    mask[m_idx++] = find_unique(arr, size, arr[i] - delta, mask);
+    // try positive
+    int newSums1[n / 2];
+    int idx1 = 0;
+    int mask[n];
+    int m_idx = 0;
+    init_array(mask, n, -1);
+    for (int a = n - 1; a >= 0; a--) {
+        if (find_index(mask, n, a) < 0) {
+            mask[m_idx++] = a;
+            int b = sums[a] - x;
+            int idx_b = find_unique_r(sums, n, b, mask);
+            if (idx_b >= 0) {
+                mask[m_idx++] = idx_b;
+                newSums1[idx1++] = b;
             }
             else
-            {
-                free(mask);
-                return (0);
-            }
+                break ;
         }
     }
-    free(mask);
-    // print_array(sub1, size / 2);
-    // print_array(sub2, size / 2);
-    return (1);
-}
-
-int split_array(int *arr, int size, int delta, int *ans)
-{
-    if (size < 2)
-        return (1);
-
-    int *sub1, *sub2;
-    sub1 = malloc(sizeof(int) * size / 2);
-    sub2 = malloc(sizeof(int) * size / 2);
-    if (positive_delta(arr, size, sub1, sub2, delta))
-    {
-        *ans = delta;
-        ans++;
-        int new_delta = sub2[size / 2 - 1] - sub2[size / 2 - 2];
-        split_array(sub2, size / 2, new_delta, ans);
+    int *ans1 = malloc(sizeof(int) * n);
+    init_array(ans1, n, SEP);
+    static int count_ans1 = 0;
+    // printf("m_idx positive: %d n: %d\n", m_idx, n);
+    if (m_idx == n) { // the positive x number is correct
+        ans1[0] = x; // add it to the answer
+        count_ans1++;
+        /* Now the new sums array is newSums1 and it needs to find the 
+        next number for the solution */
+        qsort(newSums1, n / 2, sizeof(int), cmpfunc); // sort the array
+        // printf("newSums1: ");
+        // print_array(newSums1, n / 2);
+        int *dfsResult = dfs(newSums1, n / 2);
+        // int i;
+        if (dfsResult) {
+            count_ans1++;
+            memcpy(ans1 + 1, dfsResult, sizeof(int) * n / 2);
+        }
     }
-    free(sub1);
-    free(sub2);
-    return (0);
+    // the positive x number is NOT correct
+    // try negative
+    int newSums2[n / 2];
+    int idx2 = 0;
+    m_idx = 0;
+    init_array(mask, n, -1);
+    for (int a = 0; a < n; a++) {
+        if (find_index(mask, n, a) < 0) {
+            mask[m_idx++] = a;
+            int b = sums[a] + x;
+            int idx_b = find_unique(sums, n, b, mask);
+            if (idx_b >= 0) {
+                mask[m_idx++] = idx_b;
+                newSums2[idx2++] = b;
+            }
+            else
+                break ;
+        }
+    }
+    int *ans2 = malloc(sizeof(int) * n);
+    init_array(ans2, n, SEP);
+    static int count_ans2 = 0;
+    if (m_idx == n) { // the negatve x number is correct
+        ans2[0] = -x; // add it to the answer
+        // print_array(newSums2, n / 2);
+        int *dfsResult = dfs(newSums2, n / 2);
+        // int i;
+        if (dfsResult) {
+            count_ans2++;
+            memcpy(ans2 + 1, dfsResult, sizeof(int) * n / 2);
+        }
+    }
+    if (intlen(ans1) >= intlen(ans2)) {
+        free(ans2);
+        return (ans1);
+    } else {
+        free(ans1);
+        return (ans2);
+    }
 }
 
 /**
  * Note: The returned array must be malloced, assume caller calls free().
  */
-int* recoverArray(int n, int* sums, int sumsSize, int* returnSize){
-    int *ret = malloc(sizeof(int) * n);
-    int *ans = ret;
+int* recoverArray(int n, int* sums, int sumsSize, int* returnSize) {
     qsort(sums, sumsSize, sizeof(int), cmpfunc);
-    int delta = sums[sumsSize - 1] - sums[sumsSize - 2];
-    split_array(sums, sumsSize, delta, ans);
+    int *ret = dfs(sums, sumsSize);
     print_array(ret, *returnSize);
     return (ret);
 }
 
 int main(void)
 {
-    // int size = 3;
-    // recoverArray(size, (int[]){-3,-2,-1,0,0,1,2,3}, 8, &size);
-    // int size = 4;
-    // int arr[] = {0,0,5,5,4,-1,4,9,9,-1,4,3,4,8,3,8};
+    int size = 3;
+    recoverArray(size, (int[]){-3,-2,-1,0,0,1,2,3}, 8, &size);
+    size = 4;
+    int arr[] = {0,0,5,5,4,-1,4,9,9,-1,4,3,4,8,3,8};
+    recoverArray(size, arr, 16, &size);
     int size_sums = 8;
     int size_ans = 3;
     int arr0[] = {0, 0, 5, 5, 5, 5, 10, 10}; 
     qsort(arr0, size_sums, sizeof(int), cmpfunc);
-    print_array(arr0, size_sums);
+    // print_array(arr0, size_sums);
     recoverArray(size_ans, arr0, size_sums, &size_ans);
     int arr1[] = {0, 0, 5, 5, 6, 6, 11, 11};
     print_array(arr1, size_sums);
@@ -227,6 +233,9 @@ int main(void)
     int arr2[] = {0, 3, 5, 6, 8, 9, 11, 14};
     print_array(arr2, size_sums);
     recoverArray(size_ans, arr2, size_sums, &size_ans);
+    int arr3[] = {-3, 0, 2, 3, 5, 6, 8, 11};
+    print_array(arr3, size_sums);
+    recoverArray(size_ans, arr3, size_sums, &size_ans);
 }
 /**
  * - The size of the arr is the n-root of the size of the sums
