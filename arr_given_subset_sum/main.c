@@ -210,6 +210,7 @@ int *dfs(int *sums, int n) {
 int* recoverArray(int n, int* sums, int sumsSize, int* returnSize) {
     qsort(sums, sumsSize, sizeof(int), cmpfunc);
     int *ret = dfs(sums, sumsSize);
+    *returnSize = n;
     print_array(ret, *returnSize);
     return (ret);
 }
