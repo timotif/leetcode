@@ -123,9 +123,9 @@ int positive_delta(int *arr, int size, int *sub1, int *sub2, int delta)
             int split_idx = find_unique_r(arr, size, arr[i] - delta, mask);
             if (split_idx >= 0)
             {
-                    sub2[s2_idx--] = arr[i];
+                    sub2[s1_idx--] = arr[i];
                     mask[m_idx++] = i;
-                    sub1[s1_idx--] = arr[i] - delta;
+                    sub1[s2_idx--] = arr[i] - delta;
                     mask[m_idx++] = find_unique_r(arr, size, arr[i] - delta, mask);
             }
             else
@@ -158,9 +158,9 @@ int negative_delta(int *arr, int size, int *sub1, int *sub2, int delta)
             int split_idx = find_unique(arr, size, arr[i] - delta, mask);
             if (split_idx >= 0)
             {
-                    sub2[s2_idx--] = arr[i];
+                    sub2[s1_idx--] = arr[i];
                     mask[m_idx++] = i;
-                    sub1[s1_idx--] = arr[i] - delta;
+                    sub1[s2_idx--] = arr[i] - delta;
                     mask[m_idx++] = find_unique(arr, size, arr[i] - delta, mask);
             }
             else
