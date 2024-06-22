@@ -44,12 +44,10 @@ public:
     }
     int compare(string s, string t, int i, int j) {
 		if (j == t.size()) {
-			std::cout << "Found match!" << std::endl;
 			return (1);
 		}
-		if (i == s.size())
+		if (i == s.size() || (s.size() - i) < (t.size() - j))
 			return (0);
-		std::cout << "Checking " << s[i] << " and " << t[j] << std::endl;
 		if (cache.count(pair<int, int>(i, j)) != 0)
 			return (cache[pair<int, int>(i, j)]);
         if (s[i] == t[j]) {
