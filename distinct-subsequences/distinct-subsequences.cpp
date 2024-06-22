@@ -42,22 +42,23 @@ public:
     int numDistinct(string s, string t) {
         return (compare(s, t, 0, 0));
     }
-    int compare(string s, string t, int i, int j) {
+   int compare(string& s, string& t, int i, int j) {
 		if (j == t.size()) {
 			return (1);
 		}
 		if (i == s.size() || (s.size() - i) < (t.size() - j))
 			return (0);
-		if (cache.count(pair<int, int>(i, j)) != 0)
-			return (cache[pair<int, int>(i, j)]);
+        auto key = pair<int, int>(i, j);
+		if (cache.find(key) != cache.end())
+			return (cache[key]);
         if (s[i] == t[j]) {
 			int opt1 = compare(s, t, i + 1, j + 1);
 			int opt2 = compare(s, t, i + 1, j);
-			cache[pair<int, int>(i, j)] = opt1 + opt2; 
+			cache[key] = opt1 + opt2; 
 		} else {
-			cache[pair<int, int>(i, j)] = compare(s, t, i + 1, j);
+			cache[key] = compare(s, t, i + 1, j);
 		}
-		return (cache[pair<int, int>(i, j)]);
+		return (cache[key]);
     }
 };
 
