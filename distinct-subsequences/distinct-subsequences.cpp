@@ -33,10 +33,12 @@ Constraints:
 s and t consist of English letters.
 */
 #include <iostream>
+#include <map>
 using namespace std;
 
 class Solution {
 public:
+	map<pair<int, int>, int> cache;
     int numDistinct(string s, string t) {
         return (compare(s, t, 0, 0));
     }
@@ -48,13 +50,16 @@ public:
 		if (i == s.size())
 			return (0);
 		std::cout << "Checking " << s[i] << " and " << t[j] << std::endl;
+		if (cache.count(pair<int, int>(i, j)) != 0)
+			return (cache[pair<int, int>(i, j)]);
         if (s[i] == t[j]) {
 			int opt1 = compare(s, t, i + 1, j + 1);
 			int opt2 = compare(s, t, i + 1, j);
-			return (opt1 + opt2);
+			cache[pair<int, int>(i, j)] = opt1 + opt2; 
 		} else {
-			return (compare(s, t, i + 1, j));
+			cache[pair<int, int>(i, j)] = compare(s, t, i + 1, j);
 		}
+		return (cache[pair<int, int>(i, j)]);
     }
 };
 
